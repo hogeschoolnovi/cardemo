@@ -122,73 +122,10 @@ spring.jpa.defer-datasource-initialization=true
 
 ---
 
-### **Fase 5: Service Laag**
-**Doel:** Bouw de service laag.
-
-
-1. Maak een package `com.example.carapp.service`.
-2. Voeg een **CarService** klasse toe
-3. maak deze service zo dat hij een car kan opslaan, verwijderen op basis van de id en alle auto's kan ophalen.
-
-<details>
-<summary><strong>Maak de service klasse</strong></summary>
-
-```java
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-
-@Service
-public class CarService {
-   private final CarRepository carRepository;
-
-   public CarService(CarRepository carRepository) {
-      this.carRepository = carRepository;
-   }
-
-   public Car save(Car
-                           car) {
-      return carRepository.save(car);
-   }
-
-   public List<Car> getAll(String brand) {
-      return (brand == null) ? carRepository.findAll() : carRepository.findByBrand(brand);
-   }
-
-   public Optional<Car> getById(Long id) {
-      return carRepository.findById(id);
-   }
-
-   public Optional<Car> updateCar(Long id, Car carDetails) {
-      Optional<Car> carOptional = carRepository.findById(id);
-      if (carOptional.isPresent()) {
-         Car car = carOptional.get();
-         car.setBrand(carDetails.getBrand());
-         car.setModel(carDetails.getModel());
-         return Optional.of(carRepository.save(car));
-      }
-      return Optional.empty();
-   }
-
-   public boolean delete(Long id) {
-      if (carRepository.existsById(id)) {
-         carRepository.deleteById(id);
-         return true;
-      } else {
-         return false;
-      }
-   }
-}
-   ```
-</details>
-
----
-
-### **Fase 6: Controller Laag**
+### **Fase 5: Controller Laag**
 **Doel:** Implementeer de controller-laag.
 
-Een controller is verantwoordelijk voor het afhandelen van HTTP-verzoeken en het communiceren met de service-laag. Het vertaalt inkomende verzoeken naar methoden die de gewenste acties uitvoeren en retourneert de juiste HTTP-statuscodes en gegevens.
+Een controller is verantwoordelijk voor het afhandelen van HTTP-verzoeken en het communiceren met de repository laag (uiteindelijk wordt dit vervangen door een servicelaag). Het vertaalt inkomende verzoeken naar methoden die de gewenste acties uitvoeren en retourneert de juiste HTTP-statuscodes en gegevens.
 
 #### **Wat doet de controller?**
 1. **Endpoints**
@@ -218,11 +155,9 @@ Een controller is verantwoordelijk voor het afhandelen van HTTP-verzoeken en het
 <summary><strong>Maak de REST-controller</strong></summary>
 
 ```java
-import nl.novi.cardemo.models.Car;
-import nl.novi.cardemo.services.CarService;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -231,54 +166,48 @@ import java.util.Optional;
 @RequestMapping("/cars")
 public class CarController {
 
-   private final CarService carService;
+    private final CarRepository carRepository;
 
-   public CarController(CarService carService) {
-      this.carService = carService;
-   }
+    public CarController(CarRepository carRepository) {
+        this.carRepository = carRepository;
+    }
 
-   @PostMapping
-   public ResponseEntity<?> createCar(@RequestBody Car car) {
-      Car savedCar = carService.save(car);
-      return ResponseEntity.status(HttpStatus.CREATED).body(car);
-   }
+    @PostMapping
+    public ResponseEntity<Car> createCar(@RequestBody Car car) {
+        Car savedCar = carRepository.save(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
+    }
 
-   @PutMapping("/{id}")
-   public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
-      Optional<Car> updatedCar = carService.updateCar(id, carDetails);
-      if (updatedCar.isPresent()) {
-         return ResponseEntity.ok(updatedCar.get());
-      } else {
-         return ResponseEntity.notFound().build();
-      }
-   }
+    @GetMapping
+    public ResponseEntity<List<Car>> getCars(@RequestParam(required = false) String brand) {
+        List<Car> cars = (brand == null) ? carRepository.findAll() : carRepository.findByBrand(brand);
+        return ResponseEntity.ok(cars);
+    }
 
-   @DeleteMapping("/{id}")
-   public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
-      var result = carService.delete(id);
-      if (result) {
-         return ResponseEntity.noContent().build();
-      } else {
-         return ResponseEntity.notFound().build();
-      }
-   }
+    @GetMapping("/{id}")
+    public ResponseEntity<Car> getCarById(@PathVariable Long id) {
+        Optional<Car> car = carRepository.findById(id);
+        return car.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-   @GetMapping("/{id}")
-   public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-      Optional<Car> car = carService.getById(id);
-      if (car.isPresent()) {
-         return ResponseEntity.ok(car.get());
-      } else {
-         return ResponseEntity.notFound().build();
-      }
-   }
+    @PutMapping("/{id}")
+    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
+        return carRepository.findById(id).map(car -> {
+            car.setBrand(carDetails.getBrand());
+            car.setModel(carDetails.getModel());
+            Car updatedCar = carRepository.save(car);
+            return ResponseEntity.ok(updatedCar);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-   @GetMapping
-   public ResponseEntity<List<Car>> getCars(
-           @RequestParam(required = false) String brand) {
-
-      return ResponseEntity.ok(carService.getAll(brand));
-   }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
+        if (carRepository.existsById(id)) {
+            carRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
 ```
 </details>
