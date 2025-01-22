@@ -1,10 +1,9 @@
 package nl.novi.cardemo.controllers;
-
 import nl.novi.cardemo.models.Car;
-import nl.novi.cardemo.services.CarService;
-import org.springframework.web.bind.annotation.*;
+import nl.novi.cardemo.repositories.CarRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,53 +12,46 @@ import java.util.Optional;
 @RequestMapping("/cars")
 public class CarController {
 
-    private final CarService carService;
+    private final CarRepository carRepository;
 
-    public CarController(CarService carService) {
-        this.carService = carService;
+    public CarController(CarRepository carRepository) {
+        this.carRepository = carRepository;
     }
 
     @PostMapping
-    public ResponseEntity<?> createCar(@RequestBody Car car) {
-        Car savedCar = carService.save(car);
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+    public ResponseEntity<Car> createCar(@RequestBody Car car) {
+        Car savedCar = carRepository.save(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
-        Optional<Car> updatedCar = carService.updateCar(id, carDetails);
-        if (updatedCar.isPresent()) {
-            return ResponseEntity.ok(updatedCar.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
-        var result = carService.delete(id);
-        if (result) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping
+    public ResponseEntity<List<Car>> getCars(@RequestParam(required = false) String brand) {
+        List<Car> cars = (brand == null) ? carRepository.findAll() : carRepository.findByBrand(brand);
+        return ResponseEntity.ok(cars);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Car> getCarById(@PathVariable Long id) {
-        Optional<Car> car = carService.getById(id);
-        if (car.isPresent()) {
-            return ResponseEntity.ok(car.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Car> car = carRepository.findById(id);
+        return car.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping
-    public ResponseEntity<List<Car>> getCars(
-            @RequestParam(required = false) String brand) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
+        return carRepository.findById(id).map(car -> {
+            car.setBrand(carDetails.getBrand());
+            car.setModel(carDetails.getModel());
+            Car updatedCar = carRepository.save(car);
+            return ResponseEntity.ok(updatedCar);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
-        return ResponseEntity.ok(carService.getAll(brand));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
+        if (carRepository.existsById(id)) {
+            carRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
-
