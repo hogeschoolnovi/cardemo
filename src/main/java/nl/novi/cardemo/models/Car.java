@@ -1,17 +1,18 @@
 package nl.novi.cardemo.models;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "cars")
 public class Car {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String brand;
     private String model;
 
     public Long getId() {
         return id;
-    }
-
-    public Car(String brand, String model) {
-        this.brand = brand;
-        this.model = model;
     }
 
     public void setId(Long id) {
