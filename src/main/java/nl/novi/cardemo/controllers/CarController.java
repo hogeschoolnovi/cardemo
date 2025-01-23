@@ -1,86 +1,57 @@
 package nl.novi.cardemo.controllers;
-
 import nl.novi.cardemo.models.Car;
-import org.springframework.web.bind.annotation.*;
+import nl.novi.cardemo.repositories.CarRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/cars")
 public class CarController {
-    private List<Car> carList = new ArrayList<>();
-    private Long currentId = 1L;
 
-    // CREATE: Voeg een nieuwe auto toe
+    private final CarRepository carRepository;
+
+    public CarController(CarRepository carRepository) {
+        this.carRepository = carRepository;
+    }
+
     @PostMapping
     public ResponseEntity<Car> createCar(@RequestBody Car car) {
-        car.setId(currentId++);
-        carList.add(car);
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+        Car savedCar = carRepository.save(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCar);
     }
 
-    // READ: Haal een specifieke auto op op basis van ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Car> getCar(@PathVariable Long id) {
-        var optionalCar = findCarById(id);
-        if (optionalCar == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(optionalCar);
-    }
-
-    // READ: Haal alle auto's op
     @GetMapping
-    public ResponseEntity<List<Car>> getAllCars(@RequestParam(name = "brand", required = false) String brand) {
-        if (brand != null) {
-            List<Car> filteredCars = getFilteredCars(brand);
-            return ResponseEntity.ok(filteredCars);
-        } else {
-            return ResponseEntity.ok(carList);
-        }
+    public ResponseEntity<List<Car>> getCars(@RequestParam(required = false) String brand) {
+        List<Car> cars = (brand == null) ? carRepository.findAll() : carRepository.findByBrand(brand);
+        return ResponseEntity.ok(cars);
     }
 
-    private List<Car> getFilteredCars(String brand) {
-        List<Car> filteredCars = new ArrayList<>();
-        for (Car car : carList) {
-            if (car.getBrand().equalsIgnoreCase(brand)) {
-                filteredCars.add(car);
-            }
-        }
-        return filteredCars;
+    @GetMapping("/{id}")
+    public ResponseEntity<Car> getCarById(@PathVariable Long id) {
+        Optional<Car> car = carRepository.findById(id);
+        return car.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // UPDATE: Werk een bestaande auto bij
     @PutMapping("/{id}")
-    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car car) {
-        var existingCar = findCarById(id);
-        if (existingCar == null) {
-            return ResponseEntity.notFound().build();
-        }
-        existingCar.setBrand(car.getBrand());
-        existingCar.setModel(car.getModel());
-        return ResponseEntity.ok(existingCar);
+    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
+        return carRepository.findById(id).map(car -> {
+            car.setBrand(carDetails.getBrand());
+            car.setModel(carDetails.getModel());
+            Car updatedCar = carRepository.save(car);
+            return ResponseEntity.ok(updatedCar);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // DELETE: Verwijder een auto
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCar(@PathVariable Long id) {
-        var optionalCar = getCar(id);
-        if (optionalCar == null) {
-            return ResponseEntity.notFound().build();
+        if (carRepository.existsById(id)) {
+            carRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
         }
-        carList.remove(optionalCar);
-        return ResponseEntity.noContent().build();
-    }
-
-    private Car findCarById(Long id) {
-        for (Car car : carList) {
-            if (car.getId().equals(id)) {
-                return car;
-            }
-        }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 }
