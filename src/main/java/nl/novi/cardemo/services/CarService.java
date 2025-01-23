@@ -34,6 +34,7 @@ public class CarService {
             Car car = carOptional.get();
             car.setBrand(carDetails.getBrand());
             car.setModel(carDetails.getModel());
+            car.setYear(carDetails.getYear());
             return Optional.of(carRepository.save(car));
         }
         return Optional.empty();

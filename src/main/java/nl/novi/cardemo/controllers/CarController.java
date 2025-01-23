@@ -1,7 +1,13 @@
 package nl.novi.cardemo.controllers;
 
+import jakarta.validation.Valid;
+import nl.novi.cardemo.dtos.CarInputDTO;
+import nl.novi.cardemo.dtos.CarResponseDTO;
+import nl.novi.cardemo.mappers.CarMapper;
 import nl.novi.cardemo.models.Car;
 import nl.novi.cardemo.services.CarService;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@Valid
 @RequestMapping("/cars")
 public class CarController {
 
@@ -20,16 +27,17 @@ public class CarController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createCar(@RequestBody Car car) {
-        Car savedCar = carService.save(car);
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+    public ResponseEntity<?> createCar(@Valid @RequestBody CarInputDTO car) {
+
+        Car savedCar = carService.save(CarMapper.toEntity(car));
+        return ResponseEntity.status(HttpStatus.CREATED).body(CarMapper.toResponseDTO(savedCar));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Car> updateCar(@PathVariable Long id, @RequestBody Car carDetails) {
-        Optional<Car> updatedCar = carService.updateCar(id, carDetails);
+    public ResponseEntity<CarResponseDTO> updateCar(@PathVariable Long id, @Valid @RequestBody CarInputDTO carDetails) {
+        Optional<Car> updatedCar = carService.updateCar(id, CarMapper.toEntity(carDetails));
         if (updatedCar.isPresent()) {
-            return ResponseEntity.ok(updatedCar.get());
+            return ResponseEntity.ok(CarMapper.toResponseDTO(updatedCar.get()));
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -46,20 +54,19 @@ public class CarController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Car> getCarById(@PathVariable Long id) {
+    public ResponseEntity<CarResponseDTO> getCarById(@PathVariable Long id) {
         Optional<Car> car = carService.getById(id);
         if (car.isPresent()) {
-            return ResponseEntity.ok(car.get());
+            return ResponseEntity.ok(CarMapper.toResponseDTO(car.get()));
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Car>> getCars(
+    public ResponseEntity<List<CarResponseDTO>> getCars(
             @RequestParam(required = false) String brand) {
-
-        return ResponseEntity.ok(carService.getAll(brand));
+        return ResponseEntity.ok(CarMapper.toResponseDTOList(carService.getAll(brand)));
     }
 }
 

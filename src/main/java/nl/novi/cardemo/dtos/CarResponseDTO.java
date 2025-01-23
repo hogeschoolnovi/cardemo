@@ -13,7 +13,6 @@ public class CarResponseDTO {
         return  Year.now().getValue() -year;
     }
 
-
     public Long getId() {
         return id;
     }

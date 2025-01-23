@@ -16,7 +16,7 @@ public class CarInputDTO {
     @NotNull(message = "Year cannot be null")
     @Min(value = 1886, message = "Year must be after 1886")
     @Max(value = 2024, message = "Year must be before or equal to 2024")
-    private int year;
+    private Integer year;
 
     // Getters and Setters
     public String getBrand() {
