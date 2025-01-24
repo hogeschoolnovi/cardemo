@@ -1,6 +1,10 @@
 package nl.novi.cardemo.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -10,9 +14,16 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "Brand cannot be empty")
     private String brand;
+
+    @NotBlank(message = "Model cannot be empty")
     private String model;
-    private int year;
+
+    @NotNull(message = "Year cannot be null")
+    @Min(value = 1886, message = "Year must be after 1886")
+    @Max(value = 2024, message = "Year must be before or equal to 2024")
+    private Integer year;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL) // Eén auto kan meerdere reparatienota's hebben
     private List<RepairInvoice> repairInvoices;
