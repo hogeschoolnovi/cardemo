@@ -2,6 +2,8 @@ package nl.novi.cardemo.models;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -11,6 +13,17 @@ public class Car {
     private String brand;
     private String model;
     private int year;
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL) // Eén auto kan meerdere reparatienota's hebben
+    private List<RepairInvoice> repairInvoices;
+
+    @ManyToMany
+    @JoinTable(
+            name = "car_accessories", // Naam van de join-tabel
+            joinColumns = @JoinColumn(name = "car_id"), // Kolom die verwijst naar de Car
+            inverseJoinColumns = @JoinColumn(name = "accessory_id") // Kolom die verwijst naar de Accessory
+    )
+    private List<Accessory> accessories; // Lijst van accessoires die aan deze auto gekoppeld zijn
 
     public int getYear() {
         return year;

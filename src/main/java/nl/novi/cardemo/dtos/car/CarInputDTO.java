@@ -1,4 +1,4 @@
-package nl.novi.cardemo.dtos;
+package nl.novi.cardemo.dtos.car;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

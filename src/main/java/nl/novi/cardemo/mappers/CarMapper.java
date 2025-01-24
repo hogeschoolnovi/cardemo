@@ -1,7 +1,7 @@
 package nl.novi.cardemo.mappers;
 
-import nl.novi.cardemo.dtos.CarInputDTO;
-import nl.novi.cardemo.dtos.CarResponseDTO;
+import nl.novi.cardemo.dtos.car.CarInputDTO;
+import nl.novi.cardemo.dtos.car.CarResponseDTO;
 import nl.novi.cardemo.models.Car;
 
 import java.util.List;
