@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+
 import java.util.List;
 
 @Entity
@@ -35,6 +36,7 @@ public class Car {
             inverseJoinColumns = @JoinColumn(name = "accessory_id") // Kolom die verwijst naar de Accessory
     )
     private List<Accessory> accessories; // Lijst van accessoires die aan deze auto gekoppeld zijn
+
 
     public int getYear() {
         return year;
