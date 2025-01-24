@@ -2,6 +2,62 @@
 
 Voer de volgende stappen uit in de gegeven volgorde om de nieuwe functionaliteit toe te voegen en bestaande functionaliteiten uit te breiden.
 
+**Refactoring voor een overzichtelijke Codebase**
+
+Om de codebase overzichtelijk en onderhoudbaar te houden, is het belangrijk om refactoring door te voeren terwijl we nieuwe functionaliteiten toevoegen. Dit helpt om een duidelijke structuur te behouden en voorkomt onnodige duplicatie of complexe afhankelijkheden.
+
+### **Huidige projectstructuur**
+De voorbeeld eindstructuur van het project ziet er als volgt uit:
+
+```
+C:.
+├───main
+│   ├───java
+│   │   └───nl
+│   │       └───novi
+│   │           └───cardemo
+│   │               │   CardemoApplication.java
+│   │               │
+│   │               ├───config
+│   │               │       GlobalExceptionHandler.java
+│   │               │
+│   │               ├───controllers
+│   │               │       CarController.java
+│   │               │       CarRegistrationController.java
+│   │               │
+│   │               ├───dtos
+│   │               │   ├───car
+│   │               │   │       CarInputDTO.java
+│   │               │   │       CarResponseDTO.java
+│   │               │   │
+│   │               │   └───carRegistrations
+│   │               │           CarRegistrationCreateDTO.java
+│   │               │           CarRegistrationResponseDTO.java
+│   │               │           CarRegistrationUpdateDTO.java
+│   │               │
+│   │               ├───mappers
+│   │               │       CarMapper.java
+│   │               │       CarRegistrationMapper.java
+│   │               │
+│   │               ├───models
+│   │               │       Accessory.java
+│   │               │       Car.java
+│   │               │       CarRegistration.java
+│   │               │       RepairInvoice.java
+│   │               │
+│   │               ├───repositories
+│   │               │       CarRegistrationRepository.java
+│   │               │       CarRepository.java
+│   │               │
+│   │               └───services
+│   │                       CarRegistrationService.java
+│   │                       CarService.java
+│   │
+│   └───resources
+│           application.properties
+│           data.sql
+```
+
 ---
 
 #### 1. Aanmaken van andere entiteiten
