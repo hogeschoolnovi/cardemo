@@ -1,13 +1,11 @@
 package nl.novi.cardemo.controllers;
 
 import jakarta.validation.Valid;
-import nl.novi.cardemo.dtos.CarInputDTO;
-import nl.novi.cardemo.dtos.CarResponseDTO;
+import nl.novi.cardemo.dtos.car.CarInputDTO;
+import nl.novi.cardemo.dtos.car.CarResponseDTO;
 import nl.novi.cardemo.mappers.CarMapper;
 import nl.novi.cardemo.models.Car;
 import nl.novi.cardemo.services.CarService;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

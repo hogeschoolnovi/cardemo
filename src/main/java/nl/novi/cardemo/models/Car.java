@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+
+import java.util.List;
+
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -22,6 +25,18 @@ public class Car {
     @Min(value = 1886, message = "Year must be after 1886")
     @Max(value = 2024, message = "Year must be before or equal to 2024")
     private Integer year;
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL) // Eén auto kan meerdere reparatienota's hebben
+    private List<RepairInvoice> repairInvoices;
+
+    @ManyToMany
+    @JoinTable(
+            name = "car_accessories", // Naam van de join-tabel
+            joinColumns = @JoinColumn(name = "car_id"), // Kolom die verwijst naar de Car
+            inverseJoinColumns = @JoinColumn(name = "accessory_id") // Kolom die verwijst naar de Accessory
+    )
+    private List<Accessory> accessories; // Lijst van accessoires die aan deze auto gekoppeld zijn
+
 
     public int getYear() {
         return year;
