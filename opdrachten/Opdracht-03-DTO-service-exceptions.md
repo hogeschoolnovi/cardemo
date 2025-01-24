@@ -26,6 +26,28 @@ private int year;
 ```
 </details>
 
+Voeg nu de constraints toe aan de entity
+- brand mag niet leeg zijn
+- model mag niet leeg zijn
+- year mag niet leeg zijn en moet tussen 1886 en 2024 liggen
+
+<details><summary>Bekijk de code</summary>
+
+````java
+    @NotBlank(message = "Brand cannot be empty")
+    private String brand;
+
+    @NotBlank(message = "Model cannot be empty")
+    private String model;
+
+    @NotNull(message = "Year cannot be null")
+    @Min(value = 1886, message = "Year must be after 1886")
+    @Max(value = 2024, message = "Year must be before or equal to 2024")
+    private Integer year;
+````
+
+</details>
+
 #### Stap 2: Implementeren van Getters en Setters
 Getters en setters worden toegevoegd om toegang te krijgen tot het `year` veld en het bij te werken.
 

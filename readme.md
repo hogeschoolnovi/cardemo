@@ -7,3 +7,4 @@ Opdrachten:
 
 - [Opdracht-01-Car-controller-toevoegen.md](opdrachten%2FOpdracht-01-Car-controller-toevoegen.md)
 - [Opdracht-02-Database-implementatie.md](opdrachten%2FOpdracht-02-Database-implementatie.md)
+- [Opdracht-03-DTO-service-exceptions.md](opdrachten%2FOpdracht-03-DTO-service-exceptions.md)
