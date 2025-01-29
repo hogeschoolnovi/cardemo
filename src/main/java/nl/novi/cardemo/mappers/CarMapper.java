@@ -18,11 +18,7 @@ public class CarMapper {
     }
 
     public static Car toEntity(CarInputDTO carCreateDTO) {
-        Car car = new Car();
-        car.setBrand(carCreateDTO.getBrand());
-        car.setModel(carCreateDTO.getModel());
-        car.setYear(carCreateDTO.getYear());
-        return car;
+        return new Car(carCreateDTO.getBrand(),carCreateDTO.getModel(),carCreateDTO.getYear());
     }
 
     public static List<CarResponseDTO> toResponseDTOList(List<Car> cars) {

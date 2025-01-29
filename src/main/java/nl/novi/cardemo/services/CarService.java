@@ -48,4 +48,26 @@ public class CarService {
             return false;
         }
     }
+
+
+    public Optional<Car> findById(Long id) {
+        return carRepository.findById(id);
+    }
+
+    public List<Car> getCars(
+            String brand,
+            String model) {
+        List<Car> cars;
+
+        if (brand != null && model != null) {
+            cars = carRepository.findByBrandAndModel(brand, model);
+        } else if (brand != null) {
+            cars = carRepository.findByBrand(brand);
+        } else if (model != null) {
+            cars = carRepository.findByModel(model);
+        } else {
+            cars = carRepository.findAll();
+        }
+        return cars;
+    }
 }
