@@ -1,18 +1,19 @@
 package nl.novi.cardemo.config;
 
+import nl.novi.cardemo.security.JwtService;
 import nl.novi.cardemo.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import nl.novi.cardemo.security.JwtRequestFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -24,28 +25,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService) throws Exception {
 
         http
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic(hp -> hp.disable()) //aanpassing
                 .authorizeHttpRequests(auth -> auth
                         // Publieke endpoints
                         .requestMatchers("/api-docs/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/login").permitAll() //aanpassing
+
                         .requestMatchers(HttpMethod.GET, "/cars").hasAnyRole("USER")
-
                         // Beveiligde endpoints: Alleen voor admins
-                        .requestMatchers(HttpMethod.POST, "/cars/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/cars/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/cars/**").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/cars/{carId}/carregistrations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/cars/{carId}/carregistrations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/cars/{carId}/carregistrations/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/cars/{carId}/carregistrations/**").hasRole("ADMIN")
+                        .requestMatchers("/cars/**").hasRole("ADMIN")
 
                         // Andere verzoeken worden geweigerd
                         .anyRequest().denyAll()
                 )
+                .addFilterBefore(new JwtRequestFilter(jwtService), UsernamePasswordAuthenticationFilter.class) // aanpassing
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {
                 })
