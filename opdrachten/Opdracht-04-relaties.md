@@ -58,17 +58,12 @@ C:.
 │           data.sql
 ```
 
----
+### **1. Aanmaken van nieuwe entiteiten**
 
-#### 1. Aanmaken van andere entiteiten
-Maak de volgende nieuwe entiteiten aan: `Accessory`, `CarRegistration`, en `RepairInvoice`.
-
-<details>
-<summary>Hint: Voeg de volgende klassen toe aan `src/main/java/nl/novi/cardemo/models/`</summary>
-
-- Accessory.java
-- CarRegistration.java
-- RepairInvoice.java
+#### **Stap 1: Maak een model `Accessory`**
+Maak een model `Accessory` aan met de volgende velden:
+- `id`: een unieke identificatie, automatisch gegenereerd.
+- `name`: de naam van de accessoire, dit mag niet leeg zijn.
 
 ```java
 @Entity
@@ -77,12 +72,18 @@ public class Accessory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Name cannot be empty")
     private String name;
-
-    // Getters and setters
+    
+    // Getters en setters
 }
 ```
+
+#### **Stap 2: Maak een model `CarRegistration`**
+Maak een model `CarRegistration` aan met de volgende velden:
+- `id`: een unieke identificatie, automatisch gegenereerd.
+- `registrationNumber`: een unieke registratiecode, mag niet leeg zijn.
+- `car`: een verwijzing naar het `Car`-model.
 
 ```java
 @Entity
@@ -91,16 +92,22 @@ public class CarRegistration {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Registration number cannot be empty")
     private String registrationNumber;
 
     @ManyToOne
     @JoinColumn(name = "car_id")
     private Car car;
-
-    // Getters and setters
+    
+    // Getters en setters
 }
 ```
+
+#### **Stap 3: Maak een model `RepairInvoice`**
+Maak een model `RepairInvoice` aan met de volgende velden:
+- `id`: een unieke identificatie, automatisch gegenereerd.
+- `description`: een beschrijving van de reparatie, mag niet leeg zijn.
+- `car`: een verwijzing naar het `Car`-model.
 
 ```java
 @Entity
@@ -109,25 +116,32 @@ public class RepairInvoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Description cannot be empty")
     private String description;
 
     @ManyToOne
     @JoinColumn(name = "car_id")
     private Car car;
-
-    // Getters and setters
+    
+    // Getters en setters
 }
 ```
-</details>
 
----
+### **2. Relaties toevoegen aan de `Car` klasse**
 
-#### 2. Relaties toevoegen aan bestaande Car klasse
-Voeg de benodigde relaties toe aan de `Car` klasse.
+Breid de bestaande `Car` klasse uit met de juiste relaties om deze te koppelen aan andere entiteiten. Dit zorgt ervoor dat een auto kan worden verbonden met meerdere reparatiefacturen en accessoires.
 
-<details>
-<summary>Hint: Voeg de volgende attributen toe aan `Car.java`</summary>
+#### **Wat moet je doen?**
+1. **Voeg een een-op-veel relatie toe met `RepairInvoice`**
+    - Een auto kan meerdere reparatiefacturen hebben.
+    - Gebruik de annotatie `@OneToMany` om deze relatie correct te definiëren.
+    - Zorg ervoor dat de facturen correct verwijzen naar de betreffende auto.
+
+2. **Voeg een veel-op-veel relatie toe met `Accessory`**
+    - Een auto kan meerdere accessoires hebben en accessoires kunnen bij meerdere auto's horen.
+    - Gebruik de annotatie `@ManyToMany` en definieer een koppelingsentiteit (`car_accessories`).
+
+3. **Pas de `Car` klasse aan met de volgende code:**
 
 ```java
 @OneToMany(mappedBy = "car", cascade = CascadeType.ALL)
@@ -141,30 +155,77 @@ private List<RepairInvoice> repairInvoices;
 )
 private List<Accessory> accessories;
 ```
-</details>
 
----
+#### **Verwachting na implementatie**
+- De `Car` klasse heeft een correcte relatie met `RepairInvoice` en `Accessory`.
+- Het toevoegen en ophalen van reparatiefacturen en accessoires werkt zonder problemen.
+- De database kan de juiste relaties hanteren dankzij de annotaties.
 
-#### 3. Aanmaken van de repository voor CarRegistrations
-Maak een repository interface aan voor `CarRegistration`.
+Controleer na implementatie of de datastructuur correct wordt opgeslagen in de database.
 
-<details>
-<summary>Hint: Voeg de volgende interface toe aan `src/main/java/nl/novi/cardemo/repositories/`</summary>
 
+### **3. Repositories aanmaken**
+
+Om de applicatie in staat te stellen gegevens op te slaan en op te halen uit de database, moeten we repositories aanmaken voor de verschillende entiteiten.
+
+#### **Wat moet je doen?**
+1. **Maak nieuwe repository interfaces aan in de map**
+    - Plaats de nieuwe bestanden in `src/main/java/nl/novi/cardemo/repositories/`.
+    - Zorg ervoor dat deze interfaces de juiste entiteiten en `JpaRepository` implementeren.
+
+2. **Implementeer de volgende repositories:**
+    - `CarRegistrationRepository` voor het beheren van autoregistraties.
+    - `AccessoryRepository` voor het beheren van accessoires.
+    - `RepairInvoiceRepository` voor het beheren van reparatiefacturen.
+
+3. **Voeg de volgende code toe aan elk bestand:**
+
+##### **CarRegistrationRepository.java**
 ```java
+package nl.novi.cardemo.repositories;
+
+import nl.novi.cardemo.models.CarRegistration;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 public interface CarRegistrationRepository extends JpaRepository<CarRegistration, Long> {
 }
 ```
-</details>
 
----
+##### **AccessoryRepository.java**
+```java
+package nl.novi.cardemo.repositories;
 
-#### 4. Testen van de database structuur
-Test de database structuur om te zorgen dat alle relaties correct zijn ingesteld.
+import nl.novi.cardemo.models.Accessory;
+import org.springframework.data.jpa.repository.JpaRepository;
 
+public interface AccessoryRepository extends JpaRepository<Accessory, Long> {
+}
+```
 
-#### 5. Aanmaken van de Car Registration Services
-Maak een service klasse voor `CarRegistration`.
+##### **RepairInvoiceRepository.java**
+```java
+package nl.novi.cardemo.repositories;
+
+import nl.novi.cardemo.models.RepairInvoice;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RepairInvoiceRepository extends JpaRepository<RepairInvoice, Long> {
+}
+```
+
+### **4. Car Registration Service aanmaken**
+
+Om de logica voor het registreren van auto’s te scheiden van de controller, maken we een serviceklasse aan voor `CarRegistration`.
+
+#### **Wat moet je doen?**
+1. **Maak een nieuwe klasse aan in de map:**
+    - **Locatie:** `src/main/java/nl/novi/cardemo/services/`
+    - **Naam:** `CarRegistrationService.java`
+
+2. **Implementeer de serviceklasse met de volgende verantwoordelijkheden:**
+    - Ophalen van een auto op basis van het `carId`.
+    - Koppelen van een `CarRegistration` aan de juiste `Car`.
+    - Opslaan van de registratie in de database.
 
 <details>
 <summary>Hint: Voeg de volgende klasse toe aan `src/main/java/nl/novi/cardemo/services/`</summary>
@@ -242,7 +303,7 @@ public class CarRegistrationService {
 
 ---
 
-#### 6. Aanmaken van de DTO's en Mappers
+### 5. Aanmaken van de DTO's en Mappers
 Maak de benodigde DTO's en mappers voor `CarRegistration`.
 
 <details>
@@ -328,7 +389,7 @@ public class CarRegistrationMapper {
 
 ---
 
-#### 7. Aanmaken van de Controller
+### 6. Aanmaken van de Controller
 Maak een controller voor `CarRegistration`.
 
 <details>
@@ -405,40 +466,5 @@ public class CarRegistrationController {
 
 ---
 
-#### 8. Uitbreidingen om ook andere entiteiten hun eigen repository te laten hebben incl. mappers etc.
-Breid de applicatie uit om ook repositories en mappers voor `Accessory` en `RepairInvoice` te bevatten.
-
-<details>
-<summary>Hint: Voeg de volgende interfaces en klassen toe</summary>
-
-- AccessoryRepository.java
-- AccessoryMapper.java
-- RepairInvoiceRepository.java
-- RepairInvoiceMapper.java
-
-```java
-public interface AccessoryRepository extends JpaRepository<Accessory, Long> {
-}
-```
-
-```java
-public class AccessoryMapper {
-    // Mapping methoden
-}
-```
-
-```java
-public interface RepairInvoiceRepository extends JpaRepository<RepairInvoice, Long> {
-}
-```
-
-```java
-public class RepairInvoiceMapper {
-    // Mapping methoden
-}
-```
-</details>
-
----
-
-Voer deze stappen uit in de aangegeven volgorde en test de applicatie grondig na iedere stap om er zeker van te zijn dat alles correct functioneert.
+### 7. Uitbreidingen om ook andere entiteiten
+Breid de applicatie uit om ook mappers voor `Accessory` en `RepairInvoice` te bevatten.
