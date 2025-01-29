@@ -63,8 +63,10 @@ public class CarController {
 
     @GetMapping
     public ResponseEntity<List<CarResponseDTO>> getCars(
-            @RequestParam(required = false) String brand) {
-        return ResponseEntity.ok(CarMapper.toResponseDTOList(carService.getAll(brand)));
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String model) {
+
+        return ResponseEntity.ok(CarMapper.toResponseDTOList(carService.getCars(brand,model)));
     }
 }
 

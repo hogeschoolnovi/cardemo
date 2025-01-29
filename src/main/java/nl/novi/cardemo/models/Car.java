@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
+
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -24,6 +25,7 @@ public class Car {
     @NotNull(message = "Year cannot be null")
     @Min(value = 1886, message = "Year must be after 1886")
     @Max(value = 2024, message = "Year must be before or equal to 2024")
+    @Column(name = "production_year")
     private Integer year;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL) // Eén auto kan meerdere reparatienota's hebben
@@ -36,6 +38,18 @@ public class Car {
             inverseJoinColumns = @JoinColumn(name = "accessory_id") // Kolom die verwijst naar de Accessory
     )
     private List<Accessory> accessories; // Lijst van accessoires die aan deze auto gekoppeld zijn
+
+    public Car(){
+        brand = "not set";
+        model = "not set";
+        year = 1886;
+    }
+    public Car(String brand, String model, int year) {
+
+        this.brand = brand;
+        this.model = model;
+        this.year = year;
+    }
 
 
     public int getYear() {
