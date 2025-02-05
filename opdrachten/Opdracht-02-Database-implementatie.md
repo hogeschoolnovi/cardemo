@@ -2,9 +2,9 @@
 
 Welkom bij deze opdracht! Je hebt twee opties om deze opdracht uit te voeren:
 1. **Bouw de applicatie volledig vanaf scratch** met behulp van de richtlijnen hieronder.
-2. **Clone de vorige iteratie van de repository** en breid deze uit.
+2. **Clone de vorige iteratie van de repository** en breid deze uit. (resultaat iteratie 1)[https://github.com/hogeschoolnovi/cardemo/tree/feature/Iteration-1]
 
-Voor beide opties gelden dezelfde functionele eisen en testscenario’s. Als je de repository clonet, houd er dan rekening mee dat sommige delen gerefactored moeten worden, zoals de **controller** en het **Car-model**.
+Voor beide opties gelden dezelfde functionele eisen en testscenario’s. Als je een clone van de repository maakt, houd er dan rekening mee dat sommige delen gerefactored moeten worden, zoals de **controller** en het **Car-model**.
 
 ### **Fase 1: Projectopzet met Maven**
 **Doel:** Creëer een nieuw Spring Boot-project met Maven.
